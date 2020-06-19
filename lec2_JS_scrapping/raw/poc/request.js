@@ -1,11 +1,12 @@
 
 let request = require("request");
 let cheerio = require("cheerio");
+
 let fs = require("fs");
+let eachMatchHandler = require("./match");
 
+//get html of main page
 request("https://www.espncricinfo.com/series/_/id/8039/season/2019/icc-cricket-world-cup" , dataReceiver);
-
-
 function dataReceiver(err , res , html  ){
     if(err==null && res.statusCode == 200){
     parseFile(html);
@@ -20,8 +21,6 @@ function dataReceiver(err , res , html  ){
     }
 
 }
-
-
 function parseFile(html){
     let $ = cheerio.load(html);
     let list = $("ul.list-unstyled.mb-0");
@@ -31,9 +30,9 @@ function parseFile(html){
 
     let fullLink = "https://www.espncricinfo.com/"+a;
     
+    //get html of all matches page
     request(fullLink , matchPageHandler);
 }
-
 function matchPageHandler(err , res , html){
     if(err==null && res.statusCode == 200){
         parseMatchFile(html);
@@ -48,7 +47,6 @@ function matchPageHandler(err , res , html){
         }
     
 }
-
 function parseMatchFile(html){
     // let $ = cheerio.load(html);
     // fs.writeFileSync("matchFile.html" , html);
@@ -57,25 +55,26 @@ function parseMatchFile(html){
     // console.log(cards.length);
     // fs.writeFileSync("cards.html" , cards);
 
-    let count=1;
-    // for(let i=0 ; i<cards.length ; i++){
+    // let count=1;
+    for(let i=0 ; i<cards.length ; i++){
     //     let venue = $(cards[i]).find(".small.mb-0.match-description").text();
     //     let result = $(cards[i]).find(".extra-small.mb-0.match-description.match-description-bottom").text();
-    //     let allLinks = $(cards[i]).find(".match-cta-container a");
-    //     let link = "https://www.espncricinfo.com/"+$(allLinks[0]).attr("href");
-
-    //     let match = {
+        let allLinks = $(cards[i]).find(".match-cta-container a");
+        let link = "https://www.espncricinfo.com/"+$(allLinks[0]).attr("href");
+        // console.log("-------------------------------------");
+        eachMatchHandler(link);
+        // console.log("-------------------------------------");
+        //     let match = {
     //         venue : venue,
     //         result : result,    
     //         link : link
     //     }
     //     console.log( count++);
-    //     console.log( match);
-    // }
-
-    let allLinks = $(cards[0]).find(".match-cta-container a");
-    let link = "https://www.espncricinfo.com/"+$(allLinks[0]).attr("href");
-    request(link , scoreCardHandler);
+        // console.log( link)
+    }
+    // let allLinks = $(cards[0]).find(".match-cta-container a");
+    // let link = "https://www.espncricinfo.com/"+$(allLinks[0]).attr("href");
+    // request(link , scoreCardHandler);
 }
 
 function scoreCardHandler(err , res , html){
@@ -91,7 +90,6 @@ function scoreCardHandler(err , res , html){
         console.log(res); 
     }
 }
-
 function scoreCardParse(html){
     let $ = cheerio.load(html);
     let batsmanInfo  = $(".table.batsman tbody tr");
