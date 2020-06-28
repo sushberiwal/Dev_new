@@ -46,9 +46,18 @@ openedPromise.then(function(){
     //all href promise array
     let allHrefParr = Promise.all(hrefArr);
     return allHrefParr;
-}).then(function(hrefArr){
-    let quesP = questionSubmitter(hrefArr[0]);
-    return quesP;
+}).then(function (hrefArr) {
+    let firstQWillBeSubmitP = questionSubmitter(hrefArr[0]);
+    for (let i = 1; i < hrefArr.length; i++) {
+        firstQWillBeSubmitP = firstQWillBeSubmitP.then(function () {
+            let qsp = questionSubmitter(hrefArr[i]);
+            return qsp;
+        })
+    }
+
+    return firstQWillBeSubmitP;
+}).then(function(){
+    console.log("All Question Submitted");
 })
 openedPromise.catch(function(err){
     console.log(err);
@@ -86,10 +95,11 @@ function questionSubmitter(qlink) {
             // code paste
         }).then(function (code) {
             // console.log(code);
-            pasteCode(code);
+            let codePasteP = pasteCode(code);
+            return codePasteP;
         })
             .then(function () {
-                console.log("Reached editorial page");
+                console.log("code copied");
                 resolve();
             }).catch(function (err) {
                 reject(err);
